@@ -9,7 +9,7 @@ description = "Your AI-powered terminal copilot"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "PilotCmd Team", email = ""}
+    {name = "PilotCmd Team", email = "joao167pedro@gmail.com"}
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

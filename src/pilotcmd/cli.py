@@ -66,7 +66,9 @@ def run_command(
     dry_run = dry_run or ctx.obj.get('dry_run', False)
     auto_run = auto_run or ctx.obj.get('auto_run', False)
     verbose = verbose or ctx.obj.get('verbose', False)
-    thinking = thinking or ctx.obj.get('thinking', False)
+    
+    # Prioritize the thinking flag from the command if set, otherwise use the global flag.
+    thinking_is_set = thinking or ctx.obj.get('thinking', False)
     
     try:
         if verbose:
@@ -75,7 +77,7 @@ def run_command(
                 "[dim]Your AI-powered terminal copilot[/dim]",
                 border_style="blue"
             ))
-        if thinking:
+        if thinking_is_set:
             console.print("[yellow]🧠 Thinking mode enabled - this uses more tokens[/yellow]")
 
         # Initialize components
@@ -92,8 +94,8 @@ def run_command(
         try:
             ai_model = model_factory.get_model(
                 model,
-                max_tokens=3000 if thinking else 1000,
-                thinking=thinking,
+                max_tokens=3000 if thinking_is_set else 1000,
+                thinking=thinking_is_set,
             )
             if verbose:
                 console.print(f"[dim]→ Using model: {model}[/dim]")

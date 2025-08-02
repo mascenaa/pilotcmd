@@ -14,10 +14,87 @@ Your AI-powered terminal copilot that converts natural language into system comm
 
 ## 🚀 Quick Start
 
+### System Requirements
+
+- Python 3.8 or higher
+- pip (Python package installer)
+- Terminal/Command Prompt access
+
 ### Installation
 
+#### Option 1: Install from Source (Current)
 ```bash
+# Clone the repository
+git clone https://github.com/mascenaa/pilotcmd.git
+cd pilotcmd
+
+# Install in development mode
+pip install -e .
+```
+
+#### Option 2: Direct Installation from GitHub
+```bash
+pip install git+https://github.com/mascenaa/pilotcmd.git
+```
+
+#### Option 3: PyPI (Coming Soon)
+```bash
+# This will be available once the package is published to PyPI
 pip install pilotcmd
+```
+
+#### Linux
+```bash
+# Ubuntu/Debian - Install Python and pip if needed
+sudo apt update
+sudo apt install python3-pip git
+
+# Install PilotCmd
+pip3 install git+https://github.com/mascenaa/pilotcmd.git
+
+# CentOS/RHEL/Fedora
+sudo yum install python3-pip git  # or dnf install python3-pip git
+pip3 install git+https://github.com/mascenaa/pilotcmd.git
+
+# Arch Linux
+sudo pacman -S python-pip git
+pip install git+https://github.com/mascenaa/pilotcmd.git
+```
+
+#### macOS
+```bash
+# Using Homebrew (recommended)
+brew install python3 git
+pip3 install git+https://github.com/mascenaa/pilotcmd.git
+
+# Using MacPorts
+sudo port install py311-pip git
+pip3 install git+https://github.com/mascenaa/pilotcmd.git
+
+# Direct installation (if Python and git are already installed)
+pip3 install git+https://github.com/mascenaa/pilotcmd.git
+```
+
+#### Windows
+```bash
+# Ensure you have Python and git installed, then:
+pip install git+https://github.com/mascenaa/pilotcmd.git
+
+# Or if you have multiple Python versions
+py -m pip install git+https://github.com/mascenaa/pilotcmd.git
+```
+
+#### Virtual Environment (Recommended for all platforms)
+```bash
+# Linux/macOS
+python3 -m venv pilotcmd-env
+source pilotcmd-env/bin/activate
+pip install git+https://github.com/mascenaa/pilotcmd.git
+
+# Windows
+python -m venv pilotcmd-env
+pilotcmd-env\Scripts\activate
+pip install git+https://github.com/mascenaa/pilotcmd.git
 ```
 
 ### Basic Usage
