@@ -30,6 +30,7 @@ def main(
     dry_run: bool = typer.Option(False, "--dry-run", "-d", help="Show commands without executing"),
     auto_run: bool = typer.Option(False, "--run", "-r", help="Execute without confirmation"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+    thinking: bool = typer.Option(False, "--thinking", help="Enable multi-step planning mode"),
 ) -> None:
     """🚁 Your AI-powered terminal copilot"""
     
@@ -39,6 +40,7 @@ def main(
     ctx.obj['dry_run'] = dry_run
     ctx.obj['auto_run'] = auto_run
     ctx.obj['verbose'] = verbose
+    ctx.obj['thinking'] = thinking
 
 @app.command("run", help="Execute a natural language command")
 def run_command(
@@ -48,6 +50,7 @@ def run_command(
     dry_run: bool = typer.Option(False, "--dry-run", "-d", help="Show commands without executing"),
     auto_run: bool = typer.Option(False, "--run", "-r", help="Execute without confirmation"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+    thinking: bool = typer.Option(False, "--thinking", help="Enable multi-step planning mode"),
 ) -> None:
     """
     Convert natural language prompts into system commands and execute them safely.
@@ -63,6 +66,7 @@ def run_command(
     dry_run = dry_run or ctx.obj.get('dry_run', False)
     auto_run = auto_run or ctx.obj.get('auto_run', False)
     verbose = verbose or ctx.obj.get('verbose', False)
+    thinking = thinking or ctx.obj.get('thinking', False)
     
     try:
         if verbose:
@@ -71,7 +75,9 @@ def run_command(
                 "[dim]Your AI-powered terminal copilot[/dim]",
                 border_style="blue"
             ))
-        
+        if thinking:
+            console.print("[yellow]🧠 Thinking mode enabled - this uses more tokens[/yellow]")
+
         # Initialize components
         os_detector = OSDetector()
         model_factory = ModelFactory()
@@ -84,10 +90,14 @@ def run_command(
         
         # Get AI model
         try:
-            ai_model = model_factory.get_model(model)
+            ai_model = model_factory.get_model(
+                model,
+                max_tokens=3000 if thinking else 1000,
+                thinking=thinking,
+            )
             if verbose:
                 console.print(f"[dim]→ Using model: {model}[/dim]")
-            
+
             # Create NLP parser with AI model
             parser = NLPParser(ai_model, os_info)
         except Exception as e:
