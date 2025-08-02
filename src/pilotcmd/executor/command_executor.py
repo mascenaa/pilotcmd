@@ -159,6 +159,7 @@ class CommandExecutor:
         
         for command in commands:
             result = await self.execute_command(command)
+            result.stdout = result.stdout + "\n\nExplicação: " + self.explain_output(command.command, result.stdout)
             results.append(result)
             
             # Stop on dangerous command or critical failure
@@ -178,6 +179,34 @@ class CommandExecutor:
                 cmd = f"sudo {cmd}"
         
         return cmd
+    
+    def explain_output(self, command_str: str, output: str) -> str:
+        """Retorna uma explicação do output com base em heurísticas para diversos comandos."""
+        explanation = ""
+        cmd_lower = command_str.lower()
+        if "ipconfig" in cmd_lower or "ifconfig" in cmd_lower:
+            import re
+            dns = re.findall(r"(?i)(?:dns[- ]*server(?:s)?[^:]*:\s*)([\d\.]+)", output)
+            if dns:
+                explanation += "Os seus servidores DNS são: " + ", ".join(dns) + ". "
+        elif "ping" in cmd_lower:
+            import re
+            times = re.findall(r"time[=<]\s*(\d+ms)", output)
+            if times:
+                explanation += "Tempos de resposta do ping: " + ", ".join(times) + ". "
+        elif "tracert" in cmd_lower:
+            import re
+            hops = re.findall(r"(\d+\s+ms)", output)
+            if hops:
+                explanation += "Tempos de resposta dos saltos (tracert): " + ", ".join(hops) + ". "
+        elif "dir" in cmd_lower or "ls" in cmd_lower:
+            lines = output.splitlines()
+            if lines:
+                explanation += "Listagem de arquivos/diretórios com " + str(len(lines)) + " linhas retornadas. "
+        # Outras heurísticas podem ser adicionadas para outros comandos.
+        if not explanation:
+            explanation = "Comando executado com sucesso."
+        return explanation
     
     async def _execute_windows_command(self, command: str) -> subprocess.CompletedProcess:
         """Execute command on Windows."""
