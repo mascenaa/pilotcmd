@@ -205,6 +205,105 @@ def show_history(
         console.print(f"[red]❌ Error accessing history: {str(e)}[/red]")
         raise typer.Exit(1)
 
+@app.command("explain")
+def explain_command(
+    ctx: typer.Context,
+    prompt: str = typer.Argument(..., help="Natural language command prompt to explain"),
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="AI model to use (openai, ollama)"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+) -> None:
+    """Explain what commands would be executed without running them (educational mode)"""
+    try:
+        # Get context values
+        ctx_model = ctx.obj.get('model', 'openai') if ctx.obj else 'openai'
+        ctx_verbose = ctx.obj.get('verbose', False) if ctx.obj else False
+        
+        # Use command-specific options or fall back to context
+        final_model = model or ctx_model
+        final_verbose = verbose or ctx_verbose
+        
+        # Get OS information
+        from pilotcmd.os_utils.detector import OSDetector
+        os_detector = OSDetector()
+        os_info = os_detector.detect()
+        
+        if final_verbose:
+            console.print(f"[dim]→ OS detected: {os_info.name} {os_info.version}[/dim]")
+        
+        # Initialize context manager
+        context_manager = ContextManager()
+        
+        # Try to create AI model
+        try:
+            model_factory = ModelFactory()
+            ai_model = model_factory.create_model(final_model)
+            
+            if final_verbose:
+                console.print(f"[dim]→ Using model: {final_model}[/dim]")
+
+            # Create NLP parser with AI model
+            parser = NLPParser(ai_model, os_info)
+        except Exception as e:
+            if final_verbose:
+                console.print(f"[dim]→ AI model not available ({str(e)}), using simple parser[/dim]")
+            
+            # Fallback to simple parser
+            parser = SimpleParser(os_info)
+        
+        # Parse the prompt
+        commands = asyncio.run(parser.parse(prompt))
+        
+        if not commands:
+            console.print("[yellow]❓ Could not understand the prompt. Please try rephrasing.[/yellow]")
+            return
+        
+        # Show explanation in educational format
+        console.print(f"[bold blue]📚 Explaining: [/bold blue][italic]\"{prompt}\"[/italic]")
+        console.print()
+        
+        if len(commands) == 1:
+            cmd = commands[0]
+            console.print(f"[green]→ This would execute:[/green] [cyan]{cmd.command}[/cyan]")
+            console.print(f"[green]→ Explanation:[/green] {cmd.explanation}")
+            
+            if cmd.requires_sudo:
+                console.print("[yellow]⚠️  This command requires administrator privileges[/yellow]")
+            
+            # Handle both enum and string safety levels
+            safety_level = cmd.safety_level.value if hasattr(cmd.safety_level, 'value') else cmd.safety_level
+            if safety_level == "caution":
+                console.print("[yellow]⚠️  Exercise caution when running this command[/yellow]")
+            elif safety_level == "dangerous":
+                console.print("[red]🚨 WARNING: This command could be dangerous![/red]")
+        else:
+            console.print(f"[green]→ This would execute {len(commands)} commands:[/green]")
+            for i, cmd in enumerate(commands, 1):
+                console.print(f"  [bold]{i}.[/bold] [cyan]{cmd.command}[/cyan]")
+                console.print(f"     [dim]{cmd.explanation}[/dim]")
+                
+                if cmd.requires_sudo:
+                    console.print("     [yellow]⚠️  Requires administrator privileges[/yellow]")
+                
+                # Handle both enum and string safety levels
+                safety_level = cmd.safety_level.value if hasattr(cmd.safety_level, 'value') else cmd.safety_level
+                if safety_level == "caution":
+                    console.print("     [yellow]⚠️  Exercise caution[/yellow]")
+                elif safety_level == "dangerous":
+                    console.print("     [red]🚨 WARNING: Potentially dangerous![/red]")
+                console.print()
+        
+        console.print("[dim]💡 To actually run these commands, use: [bold]pilotcmd run[/bold] \"[italic]your prompt[/italic]\"[/dim]")
+        
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Operation cancelled by user[/yellow]")
+        raise typer.Exit(130)
+    except Exception as e:
+        if final_verbose:
+            console.print_exception()
+        else:
+            console.print(f"[red]❌ Error: {str(e)}[/red]")
+        raise typer.Exit(1)
+
 @app.command("config")
 def configure(
     model: Optional[str] = typer.Option(None, "--model", "-m", help="Set default AI model"),
