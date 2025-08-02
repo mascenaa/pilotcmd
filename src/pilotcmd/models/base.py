@@ -1,6 +1,4 @@
-"""
-Base model interface for AI backends.
-"""
+"""Base model interface for AI backends."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -52,9 +50,11 @@ class BaseModel(ABC):
     def model_type(self) -> ModelType:
         """Get the model type."""
         pass
-    
+
     def get_system_prompt(self) -> str:
         """Get the system prompt for command generation."""
+        if self.config.get("thinking"):
+            return """You are a helpful AI assistant that plans and executes complex multi-step tasks.\n\nRULES:\n1. Use step-by-step reasoning to break complex requests into smaller commands\n2. Generate ONLY the command(s) needed, no explanations unless asked\n3. Use the most appropriate commands for the detected OS\n4. Prioritize safety - avoid destructive operations without explicit confirmation\n5. Use full paths when necessary\n6. Avoid commands that could damage the system\n7. If the request is unclear or potentially dangerous, ask for clarification\n\nResponse format should be JSON with the following structure:\n{\n  \"commands\": [\n    {\n      \"command\": \"the actual command to execute\",\n      \"explanation\": \"brief explanation of what this command does\",\n      \"safety_level\": \"safe|caution|dangerous\",\n      \"requires_sudo\": true/false\n    }\n  ],\n  \"os_specific\": true/false,\n  \"warning\": \"optional warning message if needed\"\n}\n\nExamples of DANGEROUS patterns to avoid or warn about:\n- rm -rf / or similar recursive deletions\n- dd commands that could overwrite disks\n- chmod 777 on system directories\n- Commands that modify system-critical files\n- Network commands that could expose the system\n\nIf you detect a potentially dangerous operation, set safety_level to \"dangerous\" and include a warning."""
         return """You are a helpful AI assistant that converts natural language prompts into safe system commands.
 
 RULES:

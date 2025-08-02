@@ -10,6 +10,7 @@ Your AI-powered terminal copilot that converts natural language into system comm
 - 🤖 **Multiple AI Models**: Support for OpenAI GPT and local Ollama models
 - 📚 **Command History**: Remembers and learns from your previous commands
 - 🎨 **Rich Output**: Beautiful, colored terminal interface
+- 🧩 **Thinking Mode**: Break down complex tasks into step-by-step commands (uses more tokens)
 
 ## 🚀 Quick Start
 
@@ -40,6 +41,8 @@ pilotcmd "delete all .tmp files" --dry-run
 
 # Use a specific AI model
 pilotcmd "install docker" --model ollama
+# Complex tasks with planning
+pilotcmd "set up a new Python project" --thinking
 ```
 
 ### Configuration
@@ -95,6 +98,7 @@ Options:
   -d, --dry-run        Show commands without executing
   -r, --run            Execute without confirmation prompts
   -v, --verbose        Enable verbose output
+  --thinking           Enable multi-step planning (uses more tokens)
   --help               Show help message
 ```
 

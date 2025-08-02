@@ -3,7 +3,14 @@
 
 import sys
 import os
+import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+try:
+    import openai  # noqa: F401
+except ModuleNotFoundError:
+    pytest.skip("openai not available", allow_module_level=True)
 
 from pilotcmd.executor.command_executor import ExecutionResult, ExecutionStatus
 from pilotcmd.nlp.simple_parser import Command, SafetyLevel
