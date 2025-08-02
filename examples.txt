@@ -1,0 +1,48 @@
+# PilotCmd Example Commands
+
+# This file contains example commands to test PilotCmd functionality
+# Run these with --dry-run first to see what commands would be generated
+
+## File Operations
+pilotcmd "list all files in current directory"
+pilotcmd "show hidden files and folders"
+pilotcmd "find all Python files in this directory"
+pilotcmd "create a folder named 'test_folder'"
+pilotcmd "copy README.md to backup_readme.md"
+
+## System Information
+pilotcmd "show current directory"
+pilotcmd "display system information"
+pilotcmd "check available disk space"
+pilotcmd "show running processes"
+pilotcmd "display memory usage"
+
+## Network Commands
+pilotcmd "ping google.com"
+pilotcmd "test connection to github.com"
+pilotcmd "show my IP address"
+
+## Development Tasks
+pilotcmd "start a simple HTTP server on port 8000"
+pilotcmd "show git status"
+pilotcmd "list all Python packages installed"
+
+## Text Processing
+pilotcmd "count lines in all Python files"
+pilotcmd "find word 'function' in all .py files"
+pilotcmd "show contents of README.md"
+
+## Safety Examples (These should be flagged as dangerous/caution)
+pilotcmd "delete all temporary files" --dry-run
+pilotcmd "format the C drive" --dry-run
+pilotcmd "remove all files in system directory" --dry-run
+
+## Interactive Examples
+pilotcmd "what is my operating system"
+pilotcmd "help me organize my desktop files"
+pilotcmd "backup my documents folder"
+
+# Always use --dry-run first to preview commands!
+# Examples:
+# pilotcmd "list all files" --dry-run
+# pilotcmd "create backup folder" --verbose --dry-run
