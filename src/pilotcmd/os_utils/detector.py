@@ -224,7 +224,7 @@ class OSDetector:
         else:
             packages = {}
 
-        firewall_tool = self._os_info.firewall_tool or self._detect_linux_firewall_tool()
+        firewall_tool = self._os_info.firewall_tool
         if firewall_tool == "ufw":
             firewall = {
                 "enable": "sudo ufw enable",
