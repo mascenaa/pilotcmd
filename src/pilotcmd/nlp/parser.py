@@ -27,6 +27,7 @@ class Command:
 
     command: str
     explanation: str
+    revert: Optional[str] = None
     step: Optional[int] = None
     safety_level: SafetyLevel = SafetyLevel.SAFE
     requires_sudo: bool = False
@@ -139,6 +140,7 @@ class NLPParser:
                 command = Command(
                     command=cmd_data.get("command", ""),
                     explanation=cmd_data.get("explanation", ""),
+                    revert=cmd_data.get("revert"),
                     step=cmd_data.get("step"),
                     safety_level=cmd_data.get("safety_level", "safe"),
                     requires_sudo=cmd_data.get("requires_sudo", False),
