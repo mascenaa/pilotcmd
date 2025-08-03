@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
 import asyncio
+from pathlib import Path
 from typing import List, Optional
 
 import typer
+from prompt_toolkit import PromptSession
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.history import FileHistory
 from rich.console import Console
 from rich.panel import Panel
 
@@ -236,6 +240,32 @@ def run_command(
         else:
             console.print(f"[red]❌ Error: {str(e)}[/red]")
         raise typer.Exit(1)
+
+
+@app.command("shell", help="Start interactive shell session")
+def shell(ctx: typer.Context) -> None:
+    """Launch an interactive REPL that keeps session history."""
+    history_dir = Path.home() / ".pilotcmd"
+    history_dir.mkdir(exist_ok=True)
+    history_file = history_dir / "shell_history"
+    session = PromptSession(
+        history=FileHistory(str(history_file)),
+        auto_suggest=AutoSuggestFromHistory(),
+    )
+
+    while True:
+        try:
+            prompt_text = session.prompt("pilotcmd> ")
+        except (EOFError, KeyboardInterrupt):
+            break
+
+        if prompt_text.strip() in {"exit", "quit"}:
+            break
+
+        if not prompt_text.strip():
+            continue
+
+        run_command(ctx, prompt_text)
 
 
 @app.command("history")
