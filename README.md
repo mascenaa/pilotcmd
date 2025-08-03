@@ -10,7 +10,7 @@ Your AI-powered terminal copilot that converts natural language into system comm
 - 🤖 **Multiple AI Models**: Support for OpenAI GPT and local Ollama models
 - 📚 **Command History**: Remembers and learns from your previous commands
 - 🎨 **Rich Output**: Beautiful, colored terminal interface
-- 🧩 **Thinking Mode**: Break down complex tasks into step-by-step commands (uses more tokens)
+- 🧩 **Thinking Mode**: Break down complex tasks into ordered, numbered commands (uses more tokens)
 
 ## 🚀 Quick Start
 
@@ -121,6 +121,8 @@ pilotcmd "install docker" --model ollama
 # Complex tasks with planning
 pilotcmd "set up a new Python project" --thinking
 ```
+
+Thinking mode returns commands labeled with step numbers so you can execute complex workflows like server setup one step at a time.
 
 ### Configuration
 

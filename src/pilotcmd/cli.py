@@ -7,12 +7,12 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from pilotcmd.os_utils.detector import OSDetector
+from pilotcmd.context_db.manager import ContextManager
+from pilotcmd.executor.command_executor import CommandExecutor
 from pilotcmd.models.factory import ModelFactory
 from pilotcmd.nlp.parser import NLPParser
 from pilotcmd.nlp.simple_parser import SimpleParser
-from pilotcmd.executor.command_executor import CommandExecutor
-from pilotcmd.context_db.manager import ContextManager
+from pilotcmd.os_utils.detector import OSDetector
 
 app = typer.Typer(
     name="pilotcmd",
@@ -40,7 +40,7 @@ def main(
         False, "--verbose", "-v", help="Enable verbose output"
     ),
     thinking: bool = typer.Option(
-        False, "--thinking", help="Enable multi-step planning mode"
+        False, "--thinking", help="Enable multi-step planning mode with numbered steps"
     ),
 ) -> None:
     """🚁 Your AI-powered terminal copilot"""
@@ -71,7 +71,7 @@ def run_command(
         False, "--verbose", "-v", help="Enable verbose output"
     ),
     thinking: bool = typer.Option(
-        False, "--thinking", help="Enable multi-step planning mode"
+        False, "--thinking", help="Enable multi-step planning mode with numbered steps"
     ),
 ) -> None:
     """
