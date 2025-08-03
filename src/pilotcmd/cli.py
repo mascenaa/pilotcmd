@@ -284,13 +284,33 @@ def shell(
             mode = "restricted"
 
     if mode == "container":
-        subprocess.run([
-            "docker",
-            "run",
-            "-it",
-            "--rm",
-            "pilotcmd:latest",
-        ])
+        def docker_image_exists(image_name: str) -> bool:
+            try:
+                result = subprocess.run(
+                    ["docker", "image", "inspect", image_name],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                return result.returncode == 0
+            except Exception:
+                return False
+
+        image_name = "pilotcmd:latest"
+        if not docker_image_exists(image_name):
+            typer.echo(f"[bold red]Docker image '{image_name}' not found. Please build it first.[/bold red]")
+            return
+        try:
+            result = subprocess.run([
+                "docker",
+                "run",
+                "-it",
+                "--rm",
+                image_name,
+            ])
+            if result.returncode != 0:
+                typer.echo(f"[bold red]Failed to run Docker container '{image_name}'.[/bold red]")
+        except Exception as e:
+            typer.echo(f"[bold red]Error running Docker container: {e}[/bold red]")
         return
 
     # Restricted shell mode
