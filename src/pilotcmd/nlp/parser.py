@@ -2,11 +2,11 @@
 Natural Language Parser for converting prompts to system commands.
 """
 
-import json
 import asyncio
+import json
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from pilotcmd.models.base import BaseModel
 from pilotcmd.os_utils.detector import OSInfo
@@ -23,10 +23,11 @@ class SafetyLevel(Enum):
 
 @dataclass
 class Command:
-    """Represents a parsed command."""
+    """Represents a parsed command step."""
 
     command: str
     explanation: str
+    step: Optional[int] = None
     safety_level: SafetyLevel = SafetyLevel.SAFE
     requires_sudo: bool = False
     category: Optional[str] = None
@@ -35,6 +36,8 @@ class Command:
         # Convert string safety level to enum if needed
         if isinstance(self.safety_level, str):
             self.safety_level = SafetyLevel(self.safety_level.lower())
+        if isinstance(self.step, str) and self.step.isdigit():
+            self.step = int(self.step)
 
 
 @dataclass
@@ -136,6 +139,7 @@ class NLPParser:
                 command = Command(
                     command=cmd_data.get("command", ""),
                     explanation=cmd_data.get("explanation", ""),
+                    step=cmd_data.get("step"),
                     safety_level=cmd_data.get("safety_level", "safe"),
                     requires_sudo=cmd_data.get("requires_sudo", False),
                     category=cmd_data.get("category"),

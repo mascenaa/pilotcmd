@@ -2,12 +2,13 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class ModelType(Enum):
     """Supported AI model types."""
+
     OPENAI = "openai"
     OLLAMA = "ollama"
     LOCAL = "local"
@@ -16,11 +17,12 @@ class ModelType(Enum):
 @dataclass
 class ModelResponse:
     """Response from an AI model."""
+
     content: str
     model: str
     usage: Optional[Dict[str, Any]] = None
     metadata: Optional[Dict[str, Any]] = None
-    
+
     def __post_init__(self):
         if self.usage is None:
             self.usage = {}
@@ -30,21 +32,21 @@ class ModelResponse:
 
 class BaseModel(ABC):
     """Abstract base class for AI models."""
-    
+
     def __init__(self, model_name: str, **kwargs):
         self.model_name = model_name
         self.config = kwargs
-    
+
     @abstractmethod
     async def generate_response(self, prompt: str, **kwargs) -> ModelResponse:
         """Generate a response from the model."""
         pass
-    
+
     @abstractmethod
     def is_available(self) -> bool:
         """Check if the model is available for use."""
         pass
-    
+
     @property
     @abstractmethod
     def model_type(self) -> ModelType:
@@ -54,7 +56,41 @@ class BaseModel(ABC):
     def get_system_prompt(self) -> str:
         """Get the system prompt for command generation."""
         if self.config.get("thinking"):
-            return """You are a helpful AI assistant that plans and executes complex multi-step tasks.\n\nRULES:\n1. Use step-by-step reasoning to break complex requests into smaller commands\n2. Generate ONLY the command(s) needed, no explanations unless asked\n3. Use the most appropriate commands for the detected OS\n4. Prioritize safety - avoid destructive operations without explicit confirmation\n5. Use full paths when necessary\n6. Avoid commands that could damage the system\n7. If the request is unclear or potentially dangerous, ask for clarification\n\nResponse format should be JSON with the following structure:\n{\n  \"commands\": [\n    {\n      \"command\": \"the actual command to execute\",\n      \"explanation\": \"brief explanation of what this command does\",\n      \"safety_level\": \"safe|caution|dangerous\",\n      \"requires_sudo\": true/false\n    }\n  ],\n  \"os_specific\": true/false,\n  \"warning\": \"optional warning message if needed\"\n}\n\nExamples of DANGEROUS patterns to avoid or warn about:\n- rm -rf / or similar recursive deletions\n- dd commands that could overwrite disks\n- chmod 777 on system directories\n- Commands that modify system-critical files\n- Network commands that could expose the system\n\nIf you detect a potentially dangerous operation, set safety_level to \"dangerous\" and include a warning."""
+            return """You are a helpful AI assistant that plans and executes complex multi-step tasks.
+
+RULES:
+1. Use detailed step-by-step reasoning to break complex requests into ordered commands
+2. Always include a numeric 'step' for each command showing execution order
+3. Generate ONLY the command(s) needed, no explanations unless asked
+4. Use the most appropriate commands for the detected OS
+5. Prioritize safety - avoid destructive operations without explicit confirmation
+6. Use full paths when necessary
+7. Avoid commands that could damage the system
+8. If the request is unclear or potentially dangerous, ask for clarification
+
+Response format should be JSON with the following structure:
+{
+  \"commands\": [
+    {
+      \"step\": number starting from 1,
+      \"command\": \"the actual command to execute\",
+      \"explanation\": \"brief explanation of what this command does\",
+      \"safety_level\": \"safe|caution|dangerous\",
+      \"requires_sudo\": true/false
+    }
+  ],
+  \"os_specific\": true/false,
+  \"warning\": \"optional warning message if needed\"
+}
+
+Examples of DANGEROUS patterns to avoid or warn about:
+- rm -rf / or similar recursive deletions
+- dd commands that could overwrite disks
+- chmod 777 on system directories
+- Commands that modify system-critical files
+- Network commands that could expose the system
+
+If you detect a potentially dangerous operation, set safety_level to \"dangerous\" and include a warning."""
         return """You are a helpful AI assistant that converts natural language prompts into safe system commands.
 
 RULES:
@@ -89,10 +125,12 @@ Examples of DANGEROUS patterns to avoid or warn about:
 
 If you detect a potentially dangerous operation, set safety_level to "dangerous" and include a warning."""
 
-    def format_prompt_with_context(self, user_prompt: str, os_info, command_mapping: Dict[str, Any]) -> str:
+    def format_prompt_with_context(
+        self, user_prompt: str, os_info, command_mapping: Dict[str, Any]
+    ) -> str:
         """Format the user prompt with OS context and command mappings."""
         system_prompt = self.get_system_prompt()
-        
+
         context = f"""
 SYSTEM CONTEXT:
 - Operating System: {os_info.name} {os_info.version}
@@ -108,9 +146,9 @@ USER REQUEST: {user_prompt}
 
 Generate appropriate commands for this system configuration.
 """
-        
+
         return f"{system_prompt}\n\n{context}"
-    
+
     def _format_command_mappings(self, mappings: Dict[str, Any]) -> str:
         """Format command mappings for the prompt."""
         formatted = []
