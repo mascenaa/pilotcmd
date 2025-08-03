@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+import subprocess
 from pathlib import Path
 from typing import List, Optional
 
@@ -17,6 +18,7 @@ from pilotcmd.models.factory import ModelFactory
 from pilotcmd.nlp.parser import NLPParser
 from pilotcmd.nlp.simple_parser import SimpleParser
 from pilotcmd.os_utils.detector import OSDetector
+from pilotcmd.container import is_docker_available
 
 app = typer.Typer(
     name="pilotcmd",
@@ -77,6 +79,8 @@ def run_command(
     thinking: bool = typer.Option(
         False, "--thinking", help="Enable multi-step planning mode with numbered steps"
     ),
+    allowed_commands: Optional[List[str]] = typer.Option(None, hidden=True),
+    blocked_commands: Optional[List[str]] = typer.Option(None, hidden=True),
 ) -> None:
     """
     Convert natural language prompts into system commands and execute them safely.
@@ -95,6 +99,9 @@ def run_command(
 
     # Prioritize the thinking flag from the command if set, otherwise use the global flag.
     thinking_is_set = thinking or ctx.obj.get("thinking", False)
+
+    allowed_set = set(allowed_commands) if allowed_commands else None
+    blocked_set = set(blocked_commands) if blocked_commands else None
 
     try:
         if verbose:
@@ -155,6 +162,20 @@ def run_command(
                 "[yellow]❓ Could not understand the prompt. Please try rephrasing.[/yellow]"
             )
             return
+
+        if allowed_set is not None or blocked_set is not None:
+            for cmd in commands:
+                first = cmd.command.split()[0]
+                if (allowed_set and first not in allowed_set) or (
+                    blocked_set and first in blocked_set
+                ):
+                    console.print(
+                        f"[red]Command '{cmd.command}' is not permitted in restricted mode.[/red]"
+                    )
+                    console.print(
+                        "[yellow]Try enabling container mode for full access.[/yellow]"
+                    )
+                    return
 
         # Show suggested commands
         console.print("→ Suggested commands:")
@@ -243,8 +264,39 @@ def run_command(
 
 
 @app.command("shell", help="Start interactive shell session")
-def shell(ctx: typer.Context) -> None:
+def shell(
+    ctx: typer.Context,
+    mode: str = typer.Option(
+        "auto", "--mode", help="Execution mode: restricted, container or auto"
+    ),
+) -> None:
     """Launch an interactive REPL that keeps session history."""
+
+    if mode == "auto":
+        available, _ = is_docker_available()
+        if available:
+            choice = typer.prompt(
+                "Docker detected. Choose mode ('restricted' or 'container')",
+                default="restricted",
+            )
+            mode = choice.strip().lower()
+        else:
+            mode = "restricted"
+
+    if mode == "container":
+        subprocess.run([
+            "docker",
+            "run",
+            "-it",
+            "--rm",
+            "pilotcmd:latest",
+        ])
+        return
+
+    # Restricted shell mode
+    whitelist = {"ls", "cat", "ipconfig", "ping", "echo"}
+    blacklist = {"rm", "shutdown", "reboot", "curl", "wget", "ssh"}
+
     history_dir = Path.home() / ".pilotcmd"
     history_dir.mkdir(exist_ok=True)
     history_file = history_dir / "shell_history"
@@ -265,7 +317,12 @@ def shell(ctx: typer.Context) -> None:
         if not prompt_text.strip():
             continue
 
-        run_command(ctx, prompt_text)
+        run_command(
+            ctx,
+            prompt_text,
+            allowed_commands=list(whitelist),
+            blocked_commands=list(blacklist),
+        )
 
 
 @app.command("history")
