@@ -5,5 +5,5 @@ COPY . /app
 
 RUN pip install --no-cache-dir .
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["pilotcmd"]
 
