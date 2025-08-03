@@ -67,6 +67,7 @@ RULES:
 6. Use full paths when necessary
 7. Avoid commands that could damage the system
 8. If the request is unclear or potentially dangerous, ask for clarification
+9. Provide a command to revert each step when possible
 
 Response format should be JSON with the following structure:
 {
@@ -75,6 +76,7 @@ Response format should be JSON with the following structure:
       \"step\": number starting from 1,
       \"command\": \"the actual command to execute\",
       \"explanation\": \"brief explanation of what this command does\",
+      \"revert\": \"command to undo or revert if possible\",
       \"safety_level\": \"safe|caution|dangerous\",
       \"requires_sudo\": true/false
     }
@@ -101,6 +103,7 @@ RULES:
 5. Use full paths when necessary
 6. Avoid commands that could damage the system
 7. If the request is unclear or potentially dangerous, ask for clarification
+8. Provide a command to revert each step when possible
 
 Response format should be JSON with the following structure:
 {
@@ -108,6 +111,7 @@ Response format should be JSON with the following structure:
     {
       "command": "the actual command to execute",
       "explanation": "brief explanation of what this command does",
+      "revert": "command to undo or revert if possible",
       "safety_level": "safe|caution|dangerous",
       "requires_sudo": true/false
     }

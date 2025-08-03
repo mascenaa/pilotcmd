@@ -373,6 +373,9 @@ def explain_command(
             )
             return
 
+        # Register prompt and commands in history
+        context_manager.save_prompt(prompt, commands, os_info)
+
         # Show explanation in educational format
         console.print(
             f'[bold blue]📚 Explaining: [/bold blue][italic]"{prompt}"[/italic]'
@@ -381,10 +384,10 @@ def explain_command(
 
         if len(commands) == 1:
             cmd = commands[0]
-            console.print(
-                f"[green]→ This would execute:[/green] [cyan]{cmd.command}[/cyan]"
-            )
-            console.print(f"[green]→ Explanation:[/green] {cmd.explanation}")
+            console.print(f"[green]→ Command:[/green] [cyan]{cmd.command}[/cyan]")
+            console.print(f"[green]→ Why:[/green] {cmd.explanation}")
+            revert_text = cmd.revert or "No revert available"
+            console.print(f"[green]→ Revert:[/green] {revert_text}")
 
             if cmd.requires_sudo:
                 console.print(
@@ -409,7 +412,9 @@ def explain_command(
             )
             for i, cmd in enumerate(commands, 1):
                 console.print(f"  [bold]{i}.[/bold] [cyan]{cmd.command}[/cyan]")
-                console.print(f"     [dim]{cmd.explanation}[/dim]")
+                console.print(f"     [dim]Why:[/dim] {cmd.explanation}")
+                revert_text = cmd.revert or "No revert available"
+                console.print(f"     [dim]Revert:[/dim] {revert_text}")
 
                 if cmd.requires_sudo:
                     console.print(
