@@ -88,7 +88,7 @@ class SimpleParser:
         if revert_cmd:
             revert_cmd = self._extract_parameters(prompt, revert_cmd)
         else:
-            revert_cmd = "No revert available"
+            revert_cmd = NO_REVERT_AVAILABLE
 
         return Command(
             command=cmd,
