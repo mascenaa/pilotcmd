@@ -88,6 +88,10 @@ def run_command(
     """
 
     # Use local options if provided, otherwise fallback to context
+    # Ensure context object is properly initialized
+    if not ctx.obj:
+        ctx.obj = {}
+    
     model = model or ctx.obj.get("model", "openai")
     dry_run = dry_run or ctx.obj.get("dry_run", False)
     auto_run = auto_run or ctx.obj.get("auto_run", False)
@@ -265,7 +269,16 @@ def shell(ctx: typer.Context) -> None:
         if not prompt_text.strip():
             continue
 
-        run_command(ctx, prompt_text)
+        # Call run_command with proper parameters instead of relying on defaults
+        run_command(
+            ctx, 
+            prompt_text,
+            model=None,  # Will use context value
+            dry_run=False,  # Will use context value
+            auto_run=False,  # Will use context value
+            verbose=False,  # Will use context value
+            thinking=False  # Will use context value
+        )
 
 
 @app.command("history")
