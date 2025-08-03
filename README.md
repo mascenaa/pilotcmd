@@ -230,6 +230,18 @@ PilotCmd is built with a modular architecture:
 - **Context DB**: SQLite database for history and learning
 - **OS Utils**: Cross-platform command adaptation
 
+## 🧭 OS Command Mapping Matrix
+
+PilotCmd automatically adapts commands for Linux, macOS and Windows. The table below highlights common tasks and their platform-specific equivalents along with notes on quirks:
+
+| Task | Linux | macOS | Windows | Notes |
+| --- | --- | --- | --- | --- |
+| List network interfaces | `ip addr show` | `ifconfig` | `ipconfig /all` | |
+| Manage firewall status | `sudo ufw status` / `sudo nft list ruleset` | `sudo pfctl -s all` | `netsh advfirewall show allprofiles` | Linux picks `ufw`, `nft`, or `iptables` if available |
+| Enable firewall | `sudo ufw enable` / `sudo systemctl start nftables` | `sudo pfctl -E` | `netsh advfirewall set allprofiles state on` | |
+| Start service | `systemctl start <svc>` | `launchctl start <svc>` | `sc start <svc>` | `systemctl` vs `sc` |
+| Install package | `sudo apt install` / `sudo dnf install` / `sudo pacman -S` | `brew install` | `winget install` / `choco install` | Package manager auto-detected with fallbacks |
+
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
